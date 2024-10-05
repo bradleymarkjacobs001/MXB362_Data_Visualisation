@@ -112,8 +112,7 @@ def main():
 
     #LOAD DATA
     df = pd.read_csv(url_shooting,usecols=[3,6,8],index_col= None)
-
-    df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv',usecols=[3,6,8],index_col= None)
+    #df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv',usecols=[3,6,8],index_col= None)
     
     
     metric_title =f' Number of Incidents'
