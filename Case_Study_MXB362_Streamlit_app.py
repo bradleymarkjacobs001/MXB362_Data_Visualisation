@@ -31,10 +31,10 @@ def display_incidents(df,year,metric_title):
             max_value=100,
         ),
     },hide_index=True) 
-   
+
+@st.cache_data
 def graphic_view(year):
     df = pd.read_csv(url_shooting , usecols=[3,6,8],index_col= None)
-    #df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv', usecols=[3,6,8],index_col= None)
     df4 = df[(df['YEAR'] == year)]
     df5 = df4['BORO'].value_counts().rename('Incidents').to_frame().reset_index()
     x_lab = "Boroughs of NYC"
@@ -42,23 +42,21 @@ def graphic_view(year):
     print(df5)
     
     fig = px.bar(df5, x='Incidents', y='BORO', color="BORO",facet_col_wrap=True, labels=True, title=("Number of incidents in year {0}".format(year)))
-
+    return fig
 # Display the Plotly figure in Streamlit
-    st.plotly_chart(fig)
+   
 
 
 
 def map (year):
     map = folium.Map(location=[ 40.71277530, -74.00597280  ], tiles='CartoDB positron')
     df = pd.read_csv(url_shooting , usecols=[3,6,8],index_col= None)
-    #df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv', usecols=[3,6,8],index_col= None)
    
     df1 = df[(df['YEAR'] == year)].value_counts().to_frame().reset_index()
   
     choropleth = folium.Choropleth (
         
         geo_data= url_police_precients,
-       # geo_data= r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\Police Precincts.geojson',
         data= df1,
         columns=["PRECINCT","count","BORO"],
         line_opacity=0.8,
@@ -83,14 +81,14 @@ def map (year):
         folium.features.GeoJsonTooltip(['precinct','COUNT','BORO'], labels=True)
     )
     st.html(f'<h4><bold><div style="text-align: center;">NYC Police Precincts Choropleth Map for {year}</div></bold></h4>')
-    st_map =st_folium(map,width=700,height=450)
+    st_folium(map,width=700,height=450)
+    
     
 
 #Display heatmap
-
+@st.cache_data
 def heatmap_all():
    df = pd.read_csv(url_shooting, usecols=[3,6],index_col= None)
-   #df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv', usecols=[3,6],index_col= None)
 
    df = df[(df['YEAR'] != None)]
    
@@ -100,7 +98,8 @@ def heatmap_all():
    fig.update_layout(
         title = '                                            Heatmap of NYC incidents in Police precincts from 2006 -2023'
     )
-   st.plotly_chart(fig)
+   return fig
+   
 
 
 def main():
@@ -112,8 +111,7 @@ def main():
 
     #LOAD DATA
     df = pd.read_csv(url_shooting,usecols=[3,6,8],index_col= None)
-    #df = pd.read_csv(r'C:\Users\bradley.jacobs\Documents\GitHub\MXB362_Data_Visualisation-\NYPD_Shooting_Incident_Data__Historic__20240817_1.csv',usecols=[3,6,8],index_col= None)
-    
+   
     
     metric_title =f' Number of Incidents'
 
@@ -122,16 +120,19 @@ def main():
     with col1:
         year = st.selectbox('Choose an option:', df['YEAR'].sort_values(ascending=False).unique(),label_visibility='collapsed')
         st.write('You selected:', year)
+
         display_incidents(df,year,metric_title)
         
     with col2:
        map(year)
-       heatmap_all()
+     
+       
+       fig2 =heatmap_all()
+       st.plotly_chart(fig2) 
 
     with col3:
-       graphic_view(year)
-
-
+       fig1 = graphic_view(year)
+       st.plotly_chart(fig1) 
 
 if __name__ == "__main__":
     main()
